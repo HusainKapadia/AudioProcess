@@ -1,8 +1,8 @@
 clear all;
 close all;
 
-s = audioread('clean_speech.wav');
-n = 0.5*audioread('babble_noise.wav');
+s = audioread('AudioFiles/clean_speech.wav');
+n = 0.5*audioread('AudioFiles/babble_noise.wav');
 ind = 1:70000;
 fs = 16000;
 l = 15;
