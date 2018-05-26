@@ -1,9 +1,0 @@
-function S = wiener(Pnn, Pyy, Y)
-    S_mag = zeros(size(Y));
-    phase = angle(Y);
-    
-    for i = 1:size(Y,2)
-        S_mag(:,i) = sqrt(max(1-(Pnn(:,i)./Pyy(:,i)), 0)).*abs(Y(:,i));
-    end
-    
-end
