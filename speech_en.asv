@@ -18,23 +18,24 @@ N = stft(n(ind), win, l, o, 1, fs);
 
 Pyy = Bartlett_P(Y, 8);
 Pnn = Bartlett_P(N, 8);
+SNR = 10*log10(sum(abs(Pyy(:,81:end)./Pnn-1),1));
 
 figure(1)
 subplot(2,1,1)
-plot(Pyy(:,118));
-title('Noisy Speech Periodogram, Pyy')
+plot(SNR);
+title('SNR')
 subplot(2,1,2)
 plot(Pnn(:,118));
 title('Noise Periodogram, Pnn')
 
 S_ps = Spectral_Subtraction(Pyy, Pnn, Y);
-S_w = wiener(Pyy, Pnn, Y);
+S_w = Wiener(Pyy, Pnn, Y);
 
 s_out1 = stift(S_ps, win, l, o, 1, fs);
 s_out2 = stift(S_w, win, l, o, 1, fs);
 %snr_op = snr(s_out, fs)
 
-sound(s_out, fs)
+%sound(s_out2, fs)
 figure(2);
 subplot(4,1,1)
 plot(s(ind));
@@ -47,4 +48,8 @@ title('Noisy Speech')
 subplot(4,1,3)
 plot(s_out1);
 axis([0 70000 -0.5 0.5])
-title('Estimated Clean Speech')
+title('Estimated Clean Speech 1')
+subplot(4,1,4)
+plot(s_out2);
+axis([0 70000 -0.5 0.5])
+title('Estimated Clean Speech 2')
