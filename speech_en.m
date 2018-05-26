@@ -27,10 +27,11 @@ subplot(2,1,2)
 plot(Pnn(:,118));
 title('Noise Periodogram, Pnn')
 
-S = Spectral_Subtraction(Pyy, Pnn, Y);
+%S = Spectral_Subtraction(Pyy, Pnn, Y);
+S = wiener(Pyy, Pnn, Y);
 
 s_out = stift(S, win, l, o, 1, fs);
-snr_op = snr(s_out, fs)
+%snr_op = snr(s_out, fs)
 
 sound(s_out, fs)
 figure(2);
