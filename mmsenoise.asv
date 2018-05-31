@@ -32,7 +32,7 @@ time_frame = floor(0.8/0.015); %safety frame
 for i = 2:size(Pyy,2)
     apripori_snr = max((Pyy(:,i))./varw_hat(:,i-1)-1,0);
     aposteriori_SNR = Pyy(:,i)./varw_hat(:,i-1);
-    mmse_n = (1./(1+apripori_snr).^2 + apripori_snr./((1+apripori_snr).*aposteriori_SNR)).*Pyy(:,i);
+    mmse_n = (1./(1+apripori_snr).^2+apripori_snr./((1+apripori_snr).*aposteriori_SNR)).*Pyy(:,i);
     alpha = 0.99;
     ebs_dd = max(alpha*varw_hat(:,i-1)/mean(varw_hat(:,i-1)) + (1-alpha)*abs(Pyy(:,i))/mean(varw_hat(:,i-1))-1,0);
     
@@ -43,7 +43,7 @@ for i = 2:size(Pyy,2)
     smoothed_varw_hat(:,i) = beta*varw_hat(:,i-1)+(1-beta)*varw_hat(:,i);
     %Safety Net
     if i>time_frame
-        varw_hat(:,i) = max(smoothed_varw_hat(:,i),min(Pyy(:,i-time_frame:i),[],2));
+    varw_hat(:,i) = max(smoothed_varw_hat(:,i),min(Pyy(:,i-time_frame:i),[],2));
     end    
 end
 true_varw = zeros(size(Pnn,2),1);
@@ -60,10 +60,10 @@ xlabel('time (s)')
 ylabel('\sigma^2_w (db)')
 legend('true noise variance','mmse estimated noise variance')
 
-S_ps = Spectral_Subtraction(Pyy, varw_hat, Y);
+S_ps = Spectral_Subtraction(Pyy, varw_hat, Y(:,1:720));
 s_out1 = stift(S_ps, win, l, o, 1, fs);
 
-S_w = Wiener(Pyy, varw_hat, Y);
+S_w = Wiener(Pyy, varw_hat, Y(:,1:720));
 s_out2 = stift(S_ps, win, l, o, 1, fs);
 
 %sound(s_out1, fs)
