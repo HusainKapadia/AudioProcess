@@ -15,13 +15,13 @@ y = s(ind)+ n(ind);
 
 Y = stft(y, win, l, o, 1, fs);
 N = stft(n(ind), win, l, o, 1, fs);
-
-Pyy = Bartlett_P(Y, 8);
-Pnn = Bartlett_P(N, 8);
+M = 16;
+Pyy = Bartlett_P(Y, M);
+Pnn = Bartlett_P(N, M);
 
 %Initialize the noise estimate by assuming first eight frames are noise
 varw_hat = zeros(size(Pyy));
-varw_hat =  Pyy(:,1);
+varw_hat =  Pyy(:,1:floor(1600/l));
 % Pnn(:,1) = varw_hat;
 %ebs = zeros(size(Pyy));
 smoothed_varw_hat = zeros(size(Pyy));
@@ -29,17 +29,17 @@ smoothed_varw_hat = zeros(size(Pyy));
 time_interval = 0.8; %seconds
 time_frame = floor(0.8/0.015); %safety frame
 
-for i = 2:size(Pyy,2)
+for i = floor(1600/l):size(Pyy,2)
     apripori_snr = max((Pyy(:,i))./varw_hat(:,i-1)-1,0);
     aposteriori_SNR = Pyy(:,i)./varw_hat(:,i-1);
     mmse_n = (1./(1+apripori_snr).^2 + apripori_snr./((1+apripori_snr).*aposteriori_SNR)).*Pyy(:,i);
-    alpha = 0.99;
+    alpha = 0.8;
     ebs_dd = max(alpha*varw_hat(:,i-1)/mean(varw_hat(:,i-1)) + (1-alpha)*abs(Pyy(:,i))/mean(varw_hat(:,i-1))-1,0);
     
     G = gammainc(2,1./(1+ebs_dd),'scaledupper');
     B = (1+ebs_dd).*G+exp(-1./(1+ebs_dd));
     varw_hat(:,i) = mmse_n.*B;
-    beta = 0.99;
+    beta = 0.8;
     smoothed_varw_hat(:,i) = beta*varw_hat(:,i-1)+(1-beta)*varw_hat(:,i);
     %Safety Net
     if i>time_frame
@@ -63,11 +63,12 @@ legend('true noise variance','mmse estimated noise variance')
 S_ps = Spectral_Subtraction(Pyy, varw_hat, Y);
 s_out1 = stift(S_ps, win, l, o, 1, fs);
 
-S_w = Wiener(Pyy, varw_hat, Y);
+S_w = Wiener1(Pyy, varw_hat, Y);
 s_out2 = stift(S_ps, win, l, o, 1, fs);
 
 %sound(s_out1, fs)
 sound(s_out2, fs)
+figure
 subplot(3,1,1)
 plot(s_out2);
 axis([0 70000 -0.5 0.5])
