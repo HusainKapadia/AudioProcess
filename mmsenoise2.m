@@ -37,7 +37,7 @@ for i = floor(1600/l)+1:size(Pyy,2)
     
     alpha = 0.8;
     S_hat = Wiener2(apriori_snr, Y(:,i-1));
-    ebs_dd = alpha*(abs(S_hat).^2)/mean(varw_hat(:,i-1)) + (1-alpha)*max(abs(Pyy(:,i))/mean(varw_hat(:,i-1))-1,0);
+    ebs_dd = alpha*(abs(S_hat).^2)/mean(varw_hat(:,i-1)) + (1-alpha)*max(Pyy(:,i)/mean(varw_hat(:,i-1))-1,0);
     
     G = gammainc(2,1./(1+ebs_dd),'scaledupper');
     B = (1+ebs_dd).*G + exp(-1./(1+ebs_dd));
