@@ -21,17 +21,17 @@ Pnn = Bartlett_P(N, M);
 
 %Initialize the noise estimate by assuming first eight frames are noise
 varw_hat = zeros(size(Pyy));
-varw_hat = Pyy(:,1:floor(1600/l));
+varw_hat = Pyy(:,1:floor(500/l));
 % Pnn(:,1) = varw_hat;
 %ebs = zeros(size(Pyy));
 smoothed_varw_hat = zeros(size(Pyy));
 %Update noise using safety net
 time_interval = 0.8; %seconds
 time_frame = floor(0.8/0.015); %safety frame
-varw_hat(:,floor(1600/l)) = mean(Pyy(:,1:floor(1600/l)),2);
+%varw_hat(:,floor(1600/l)) = mean(Pyy(:,1:floor(1600/l)),2);
 
-for i = floor(1600/l)+1:size(Pyy,2)
-    aposteriori_SNR = Pyy(:,i)./mean(varw_hat(:,i-1:i-floor(1600/l)),2);
+for i = floor(500/l)+1:size(Pyy,2)
+    aposteriori_SNR = Pyy(:,i)./varw_hat(:,i-1);
     apriori_snr = max(aposteriori_SNR-1,0);
     mmse_n = (1./(1+apriori_snr).^2 + apriori_snr./((1+apriori_snr).*aposteriori_SNR)).*Pyy(:,i);
     
