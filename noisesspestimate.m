@@ -17,8 +17,8 @@ y = s(ind)+ n(ind);
 Y = stft(y, win, l, o, 1, fs);
 N = stft(n(ind), win, l, o, 1, fs);
 
-Pyy = Bartlett_P(Y, 20);
-Pnn = Bartlett_P(N, 20);
+Pyy = Bartlett_P(Y, 8);
+Pnn = Bartlett_P(N, 8);
 
 fixed_apriori_snr_db =15;
 fixed_apriori_snr = 10^(fixed_apriori_snr_db/10);
