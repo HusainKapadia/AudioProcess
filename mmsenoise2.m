@@ -2,8 +2,10 @@ clear all;
 close all;
 
 s = audioread('AudioFiles/clean_speech.wav');
-n = 0.5*wgn(length(s),1,-24);
+%n = 0.5*wgn(length(s),1,-24);
 %n = 0.5*audioread('AudioFiles/babble_noise.wav');
+%n = 50*audioread('AudioFiles/aritificial_nonstat_noise.wav');
+n = audioread('AudioFiles/Speech_shaped_noise.wav');
 ind = 1:70000;
 fs = 16000;
 l = 15;
