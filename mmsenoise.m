@@ -21,25 +21,29 @@ Pnn = Bartlett_P(N, 8);
 
 %Initialize the noise estimate by assuming first eight frames are noise
 varw_hat = zeros(size(Pyy));
-varw_hat =  Pyy(:,1);
-% Pnn(:,1) = varw_hat;
-%ebs = zeros(size(Pyy));
+
+varw_hat(:,1) =  mean(Pyy(:,1:(floor(1/0.015))),2);
 smoothed_varw_hat = zeros(size(Pyy));
 %Update noise using safety net
 time_interval = 0.8; %seconds
-time_frame = floor(0.8/0.015); %safety frame
+time_frame = floor(0.8/0.015);
 
 for i = 2:size(Pyy,2)
-    apripori_snr = max((Pyy(:,i))./varw_hat(:,i-1)-1,0);
+    %S_w = Wiener(Pyy(:,i-1),varw_hat(:,i-1), Y(:,i));
     aposteriori_SNR = Pyy(:,i)./varw_hat(:,i-1);
-    mmse_n = (1./(1+apripori_snr).^2 + apripori_snr./((1+apripori_snr).*aposteriori_SNR)).*Pyy(:,i);
-    alpha = 0.99;
+    %ALPHA = 0.8;
+    %apriori_snr=max(ALPHA*( abs(S_w).^2./varw_hat(:,i-1))+(1-ALPHA)*(aposteriori_SNR -1),0);
+    
+    apriori_snr = max((Pyy(:,i))./varw_hat(:,i-1)-1,0);
+    
+    mmse_n = (1./(1+apriori_snr).^2 + apriori_snr./((1+apriori_snr).*aposteriori_SNR)).*Pyy(:,i);
+    alpha = 0.9;
     ebs_dd = max(alpha*varw_hat(:,i-1)/mean(varw_hat(:,i-1)) + (1-alpha)*abs(Pyy(:,i))/mean(varw_hat(:,i-1))-1,0);
     
     G = gammainc(2,1./(1+ebs_dd),'scaledupper');
     B = (1+ebs_dd).*G+exp(-1./(1+ebs_dd));
     varw_hat(:,i) = mmse_n.*B;
-    beta = 0.99;
+    beta = 0.8;
     smoothed_varw_hat(:,i) = beta*varw_hat(:,i-1)+(1-beta)*varw_hat(:,i);
     %Safety Net
     if i>time_frame
@@ -59,12 +63,12 @@ plot(t,10*log10(mean(varw_hat)))
 xlabel('time (s)')
 ylabel('\sigma^2_w (db)')
 legend('true noise variance','mmse estimated noise variance')
-
+%%
 S_ps = Spectral_Subtraction(Pyy, varw_hat, Y);
 s_out1 = stift(S_ps, win, l, o, 1, fs);
 
 S_w = Wiener(Pyy, varw_hat, Y);
-s_out2 = stift(S_ps, win, l, o, 1, fs);
+s_out2 = stift(S_w, win, l, o, 1, fs);
 
 %sound(s_out1, fs)
 sound(s_out2, fs)
