@@ -3,7 +3,7 @@ close all;
 
 s = audioread('AudioFiles/clean_speech.wav');
 
-type = 4;
+type = 2;
 db = -24;
 n = genNoise(type, db, length(s));
 
@@ -26,18 +26,16 @@ Pnn = Bartlett_P(N, M);
 %Initialize the noise estimate by assuming first eight frames are noise
 varw_hat = zeros(size(Pyy));
 varw_hat(:,1:floor(1600/l)) = Pyy(:,1:floor(1600/l));
-% Pnn(:,1) = varw_hat;
-%ebs = zeros(size(Pyy));
 smoothed_varw_hat = zeros(size(Pyy));
-lrt = zeros(1, size(Pyy,2));
+%lrt = zeros(1, size(Pyy,2));
+
 %Update noise using safety net
 time_interval = 0.8; %seconds
 time_frame = floor(time_interval/0.015); %safety frame
-%varw_hat(:,floor(1600/l)) = mean(Pyy(:,1:floor(1600/l)),2);
-alpha = 0.98;
+alpha = 0.99;
 beta = 0.8;
-[~, apriori_snr] = SNR_estimates(Pyy(:,floor(1600/l)), varw_hat(:,floor(1600/l)-1), 'ML');
 
+[~, apriori_snr] = SNR_estimates(Pyy(:,floor(1600/l)), varw_hat(:,floor(1600/l)-1), 'ML');
 for i = 1+floor(1600/l):size(Pyy,2)
     S_hat = Wiener2(apriori_snr, Y(:,i-1));
     [apost_snr, apriori_snr] = SNR_estimates(Pyy(:,i), varw_hat(:,i-1), 'DD', S_hat, alpha);
