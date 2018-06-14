@@ -2,9 +2,8 @@ clear all;
 close all;
 
 s = audioread('AudioFiles/clean_speech.wav');
-
-type = 2;
-db = -24;
+type = 3;
+db = -30;
 n = genNoise(type, db, length(s));
 
 ind = 1:70000;
@@ -19,24 +18,25 @@ y = s(ind)+ n(ind);
 
 Y = stft(y, win, l, o, 1, fs);
 N = stft(n(ind), win, l, o, 1, fs);
-M = 8;
+
+M = 4;
 Pyy = Bartlett_P(Y, M);
 Pnn = Bartlett_P(N, M);
 
 %Initialize the noise estimate by assuming first eight frames are noise
 varw_hat = zeros(size(Pyy));
-varw_hat(:,1:floor(1600/l)) = Pyy(:,1:floor(1600/l));
+varw_hat(:,1) = Pyy(:,1);
 smoothed_varw_hat = zeros(size(Pyy));
 %lrt = zeros(1, size(Pyy,2));
 
 %Update noise using safety net
-time_interval = 0.8; %seconds
-time_frame = floor(time_interval/0.015); %safety frame
+time_interval = 800; %samples
+time_frame = floor(time_interval/l); %safety frame
 alpha = 0.99;
-beta = 0.8;
+beta = 0.85;
 
-[~, apriori_snr] = SNR_estimates(Pyy(:,floor(1600/l)), varw_hat(:,floor(1600/l)-1), 'ML');
-for i = 1+floor(1600/l):size(Pyy,2)
+[~, apriori_snr] = SNR_estimates(Pyy(:,1), varw_hat(:,1), 'ML');
+for i = 2:size(Pyy,2)
     S_hat = Wiener2(apriori_snr, Y(:,i-1));
     [apost_snr, apriori_snr] = SNR_estimates(Pyy(:,i), varw_hat(:,i-1), 'DD', S_hat, alpha);
     
@@ -48,7 +48,7 @@ for i = 1+floor(1600/l):size(Pyy,2)
     smoothed_varw_hat(:,i) = beta*varw_hat(:,i-1)+(1-beta)*varw_hat(:,i);
     
     %Safety Net
-    if i>time_frame
+    if i > time_frame
         varw_hat(:,i) = max(smoothed_varw_hat(:,i), min(Pyy(:,i-time_frame:i), [], 2));
     end
     
@@ -71,8 +71,8 @@ hold on
 plot(t,10*log10(mean(varw_hat)))
 xlabel('time (s)')
 ylabel('\sigma^2_w (db)')
-legend('true noise variance','mmse estimated noise variance')
-axis([0 size(Y,2) -30 -10])
+legend('True Noise Variance','MMSE Estimated Noise Variance')
+axis([0 size(Y,2) db-5 db+20])
 
 % figure
 % plot(lrt)
