@@ -2,8 +2,8 @@ clear all;
 close all;
 
 s = audioread('AudioFiles/clean_speech.wav');
-%n = 0.5*wgn(length(s),1,-24);
-n = 0.5*audioread('AudioFiles/babble_noise.wav');
+n = 0.5*wgn(length(s),1,-24);
+%n = 0.5*audioread('AudioFiles/babble_noise.wav');
 ind = 1:70000;
 fs = 16000;
 l = 15;
@@ -16,7 +16,7 @@ y = s(ind)+ n(ind);
 
 Y = stft(y, win, l, o, 1, fs);
 N = stft(n(ind), win, l, o, 1, fs);
-M = 4;
+M = 8;
 Pyy = Bartlett_P(Y, M);
 Pnn = Bartlett_P(N, M);
 
@@ -47,12 +47,7 @@ for i = 1+floor(1600/l):size(Pyy,2)
     %Safety Net
     if i>time_frame
         varw_hat(:,i) = max(smoothed_varw_hat(:,i),min(Pyy(:,i-time_frame:i),[],2));
-    end
-    lrt(i) = vad(apriori_snr,apost_snr);
-%     if(lrt(i)>0.02)
-%         varw_hat(:,i) = varw_hat(:,i-1);
-%     end
-    
+    end    
 end
 true_varw = zeros(size(Pnn,2),1);
 true_varw(1) = mean(Pnn(:,1));

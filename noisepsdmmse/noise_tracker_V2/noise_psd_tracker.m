@@ -43,7 +43,7 @@ nu=0.6;
 
 ALPHA= 0.98; %% this is the smoothing factor used in the decision directed approach
 SNR_LOW_LIM=eps;
-frLen  = 240*fs/8000;
+frLen  = 256*fs/8000;
 fShift   = frLen/2; 
 nFrames =  floor((length(noisy) - 2*frLen)/fShift );
 anWin  = sqrt(hanning(frLen ));
