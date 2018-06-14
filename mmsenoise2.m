@@ -2,15 +2,11 @@ clear all;
 close all;
 
 s = audioread('AudioFiles/clean_speech.wav');
-n = 0.5*wgn(length(s),1,-24);
-%n = 0.5*audioread('AudioFiles/babble_noise.wav');
-<<<<<<< HEAD
-%n = 50*audioread('AudioFiles/aritificial_nonstat_noise.wav');
-n = audioread('AudioFiles/Speech_shaped_noise.wav');
-type = 3;
-n = genNoise(type, length(s));
-=======
->>>>>>> 3a5e908a139bcc74157cf16f2c9625f8cc7be5ec
+
+type = 1;
+db = -24;
+n = genNoise(type, db, length(s));
+
 ind = 1:70000;
 fs = 16000;
 l = 15;
@@ -49,8 +45,9 @@ for i = 1+floor(1600/l):size(Pyy,2)
     
     G = gammainc(2,1./(1+apriori_snr));
     B = (1+apriori_snr).*G + exp(-1./(1+apriori_snr));
-    varw_hat(:,i) = mmse_n;%./B;    
+    varw_hat(:,i) = mmse_n./B;    
     smoothed_varw_hat(:,i) = beta*varw_hat(:,i-1)+(1-beta)*varw_hat(:,i);
+    
     %Safety Net
     if i>time_frame
         varw_hat(:,i) = max(smoothed_varw_hat(:,i),min(Pyy(:,i-time_frame:i),[],2));
