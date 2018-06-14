@@ -3,6 +3,7 @@ close all;
 
 s = audioread('AudioFiles/clean_speech.wav');
 n = 0.5*audioread('AudioFiles/babble_noise.wav');
+%n = wgn(600000,1,-6);
 ind = 1:70000;
 fs = 16000;
 l = 15;
@@ -35,7 +36,7 @@ if (P_l>0.99)
     p_h1_giveny = min(p_h1_giveny,0.99);
 end
 mmse_n= (1-p_h1_giveny).*Pyy(:,i)+p_h1_giveny.*varw_hat(:,i-1);
-alpha = 0.8;
+alpha = 0.9;
 varw_hat(:,i) = alpha*varw_hat(:,i-1)+(1-alpha)*mmse_n;
 end
 
@@ -53,7 +54,7 @@ xlabel('time (s)')
 ylabel('\sigma^2_w (db)')
 legend('true noise variance','SPP estimated noise variance')
 
-S_w = Wiener(Pyy, varw_hat, Y);
+S_w = Wiener1(Pyy, varw_hat, Y);
 s_out2 = stift(S_w, win, l, o, 1, fs);
 sound(s_out2, fs)
 % S_ps = Spectral_Subtraction(Pyy, varw_hat, Y);
