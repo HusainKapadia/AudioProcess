@@ -15,7 +15,7 @@ y = s(ind)+ n(ind);
 
 Y = stft(y, win, l, o, 1, fs);
 N = stft(n(ind), win, l, o, 1, fs);
-M = 16;
+M = 8;
 Pyy = Bartlett_P(Y, M);
 Pnn = Bartlett_P(N, M);
 
