@@ -26,7 +26,7 @@ title('SNR')
 axis([0 size(Y,2) -20 40])
 
 S_ps = Spectral_Subtraction(Pyy, Pnn, Y);
-S_w = Wiener(Pyy, Pnn, Y);
+S_w = Wiener1(Pyy, Pnn, Y);
 
 s_out1 = stift(S_ps, win, l, o, 1, fs);
 s_out2 = stift(S_w, win, l, o, 1, fs);
