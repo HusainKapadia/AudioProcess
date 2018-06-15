@@ -1,9 +1,9 @@
-clear all;
+clc;
 close all;
 
 s = audioread('AudioFiles/clean_speech.wav');
-type = 3;
-db = -30;
+type = 1;
+db = 50;
 n = genNoise(type, db, length(s));
 
 ind = 1:70000;
