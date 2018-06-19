@@ -1,0 +1,7 @@
+function snr = ssnr(clean,estimated,fs)
+     L = 15*fs/1000;                % 15 ms frame length
+     M = size(estimated, 2)/L;      %number of sections
+     ssnr = 10log(    sum(clean(i*L:(i+1)*L).^2./estimated(i*L:(i+1)*L).^2)
+
+end
+    
