@@ -32,7 +32,6 @@ time_frame = 103; %safety frame
 %varw_hat(:,floor(1600/l)) = mean(Pyy(:,1:floor(1600/l)),2);
 alpha = 0.98;
 beta = 0.8;
-[~, apriori_snr] = SNR_estimates(Pyy(:,floor(1600/l)), varw_hat(:,floor(1600/l)-1), 'ML');
 S_hat = 0;
 for i = 1:size(Pyy,2)
     if(i==1)
