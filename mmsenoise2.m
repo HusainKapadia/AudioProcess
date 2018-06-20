@@ -23,56 +23,10 @@ Pnn = Bartlett_P(N, M);
 %Initialize the noise estimate by assuming first eight frames are noise
 varw_hat = zeros(size(Pyy));
 varw_hat(:,1) = mean(Pyy(:,1:5),2);
-% Pnn(:,1) = varw_hat;
-%ebs = zeros(size(Pyy));
-smoothed_varw_hat = zeros(size(Pyy));
-%Update noise using safety net
-time_interval = 0.8; %seconds
-time_frame = 103; %safety frame
-%varw_hat(:,floor(1600/l)) = mean(Pyy(:,1:floor(1600/l)),2);
-alpha = 0.98;
-beta = 0.8;
-S_hat = 0;
-for i = 1:size(Pyy,2)
-    if(i==1)
-        apost_snr = (Pyy(:,i))./varw_hat(:,i);
-    else
-        apost_snr = (Pyy(:,i))./varw_hat(:,i-1);
-    end
-    ebs = max(apost_snr-1,eps);
-    mmse_n = (1./(1+ebs).^2 + ebs./((1+ebs).*apost_snr)).*Pyy(:,i);
-    if(i == 1)
-        ebs_dd = ebs;    
-    else
-        ebs_dd = max(alpha*abs(S_hat).^2./varw_hat(:,i-1) + (1-alpha)*ebs,eps);
-    end
-    G = gammainc(1./(1+ebs_dd),2);
-    B = (1+ebs_dd).*G + exp(-1./(1+ebs_dd));
-    varw_hat(:,i) = mmse_n./B;
-    if(i ~= 1)
-        smoothed_varw_hat(:,i) = beta*varw_hat(:,i-1)+(1-beta)*varw_hat(:,i);
-    end
-
-    %Safety Net
-    if i>time_frame
-        varw_hat(:,i) = max(smoothed_varw_hat(:,i),min(Pyy(:,i-time_frame:i),[],2));
-    end
-    %S_hat = ebs_dd.*varw_hat(:,i-1);
-    apost_snr = (Pyy(:,i))./varw_hat(:,i);
-    ebs = max(apost_snr-1,eps);
-    if(i==1)
-        ebs_dd = ebs;
-    else
-        ebs_dd = max(alpha*abs(S_hat).^2./varw_hat(:,i-1) + (1-alpha)*ebs,eps);
-    end
-    
-    S_hat = Wiener2(ebs_dd, Y(:,i));
-    S_w(:,i) = S_hat;
-end
+[varw_hat,S_w] = mmse(Y);
 true_varw = zeros(size(Pnn,2),1);
-true_varw(1) = mean(Pnn(:,1));
-for i = 2:size(Pnn,2)
-    true_varw(i) = beta*mean(Pnn(:,i-1))+(1-beta)*mean(Pnn(:,i));
+for i = 1:size(Pnn,2)
+    true_varw(i) =mean(Pnn(:,i));
 end
 
 figure
@@ -87,9 +41,9 @@ legend('true noise variance','mmse estimated noise variance')
 S_ps = Spectral_Subtraction(Pyy, varw_hat, Y);
 s_out1 = stift(S_ps, win, l, o, 1, fs);
 
-%S_w = Wiener1(Pyy, varw_hat, Y);
+S_w2 = Wiener1(Pyy, varw_hat, Y);
 s_out2 = stift(S_w, win, l, o, 1, fs);
-
+err = sum(sum((abs(S_w2(:,1:720)) - abs(S_w(:,1:720))))).^2
 %sound(s_out1, fs)
 sound(s_out2, fs)
 figure
