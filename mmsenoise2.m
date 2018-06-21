@@ -2,8 +2,8 @@ clc;
 close all;
 
 s = audioread('AudioFiles/clean_speech.wav');
-type = 1;
-db = 50;
+type = 2;
+db = 20;
 n = genNoise(type, db, length(s));
 
 ind = 1:70000;
@@ -35,12 +35,13 @@ time_frame = floor(time_interval/l); %safety frame
 alpha = 0.99;
 beta = 0.85;
 
-[~, apriori_snr] = SNR_estimates(Pyy(:,1), varw_hat(:,1), 'ML');
+[apost_snr, apriori_snr] = SNR_estimates(Pyy(:,1), varw_hat(:,1), 'ML');
 for i = 2:size(Pyy,2)
     S_hat = Wiener2(apriori_snr, Y(:,i-1));
-    [apost_snr, apriori_snr] = SNR_estimates(Pyy(:,i), varw_hat(:,i-1), 'DD', S_hat, alpha);
     
     mmse_n = (1./(1+apriori_snr).^2 + apriori_snr./((1+apriori_snr).*apost_snr)).*Pyy(:,i);
+    
+    [apost_snr, apriori_snr] = SNR_estimates(Pyy(:,i), varw_hat(:,i-1), 'DD', S_hat, alpha);
     
     G = gammainc(2, 1./(1+apriori_snr));
     B = (1+apriori_snr).*G + exp(-1./(1+apriori_snr));
@@ -58,6 +59,7 @@ for i = 2:size(Pyy,2)
 %     end
     
 end
+
 true_varw = zeros(size(Pnn,2),1);
 true_varw(1) = mean(Pnn(:,1));
 for i = 2:size(Pnn,2)
@@ -72,7 +74,7 @@ plot(t,10*log10(mean(varw_hat)))
 xlabel('time (s)')
 ylabel('\sigma^2_w (db)')
 legend('True Noise Variance','MMSE Estimated Noise Variance')
-axis([0 size(Y,2) db-5 db+20])
+%axis([0 size(Y,2) db-5 db+20])
 
 % figure
 % plot(lrt)
@@ -86,7 +88,7 @@ S_w = Wiener1(Pyy, varw_hat, Y);
 s_out2 = stift(S_ps, win, l, o, 1, fs);
 
 %sound(s_out1, fs)
-sound(s_out2, fs)
+%sound(s_out2, fs)
 figure
 subplot(3,1,1)
 plot(s_out2);
