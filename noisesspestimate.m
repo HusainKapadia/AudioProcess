@@ -25,7 +25,7 @@ fixed_apriori_snr = 10^(fixed_apriori_snr_db/10);
 
 %Initialize the noise estimate by assuming first eight frames are noise
 varw_hat = zeros(size(Pyy));
-varw_hat(:,1) =  Pyy(:,1);
+varw_hat(:,1) =  mean(Pyy(:,1:5),2);
 
 for i = 2:size(Pyy,2)
 p_h1_giveny = 1./(1+(1+fixed_apriori_snr)*exp((-Pyy(:,i)*fixed_apriori_snr)./(varw_hat(:,i-1)*(1+fixed_apriori_snr))));
@@ -35,14 +35,14 @@ if (P_l>0.99)
     p_h1_giveny = min(p_h1_giveny,0.99);
 end
 mmse_n= (1-p_h1_giveny).*Pyy(:,i)+p_h1_giveny.*varw_hat(:,i-1);
-alpha = 0.8;
+% varw_hat(:,i) = mmse_n;
+alpha = 0.85;
 varw_hat(:,i) = alpha*varw_hat(:,i-1)+(1-alpha)*mmse_n;
 end
 
 true_varw = zeros(size(Pnn,2),1);
-true_varw(1) = mean(Pnn(:,1));
-for i = 2:size(Pnn,2)
-    true_varw(i) = 0.9*mean(Pnn(:,i-1))+0.1*mean(Pnn(:,i));
+for i = 1:size(Pnn,2)
+    true_varw(i) = mean(Pnn(:,i));
 end
 figure
 t = linspace(0,10800,size(Pnn,2))/100;
@@ -53,7 +53,7 @@ xlabel('time (s)')
 ylabel('\sigma^2_w (db)')
 legend('true noise variance','SPP estimated noise variance')
 
-S_w = Wiener(Pyy, varw_hat, Y);
+S_w = Wiener1(Pyy, varw_hat, Y);
 s_out2 = stift(S_w, win, l, o, 1, fs);
 sound(s_out2, fs)
 % S_ps = Spectral_Subtraction(Pyy, varw_hat, Y);
