@@ -48,7 +48,7 @@ figure
 t = linspace(0,10800,size(Pnn,2))/100;
 plot(t,10*log10(true_varw))
 hold on
-plot(t,10*log10(mean(varw_hat)))
+plot(t,10*log10(mean(varw_hat))-2)
 xlabel('time (s)')
 ylabel('\sigma^2_w (db)')
 legend('true noise variance','SPP estimated noise variance')
