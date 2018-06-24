@@ -3,7 +3,7 @@ close all;
 
 s = audioread('AudioFiles/clean_speech.wav');
 type = 1;
-db = 28;
+db = 20;
 n1 = genNoise(type, db, length(s));
 n2 = genNoise(type, db, length(s));
 n3 = genNoise(type, db, length(s));
@@ -59,19 +59,24 @@ for j = 1:size(Y,2)
 end   
 
 %%Single channel Wiener
-
+M = 8;
+Pse = Bartlett_P(S_e, M);
+%[noise_psd] = mmse_noise_tracker(Pse, S_e);
+%[~, ~, noise_psd] = vad_noise_tracker(Pse, S_e, size(s(:,1)));
+[noise_psd] = mmse_noise_tracker_spp(Pse);
+S_o = Wiener1(Pse, noise_psd, S_e);
 
 %%STIFT with overlap add
-s_e = stift(S_e, 4, l, o, 1, fs);
+s_o = stift(S_o, 4, l, o, 1, fs);
 
 %% Plots
 figure()
 subplot(3,1,1)
 plot(y), title('Noisy Speech');
 subplot(3,1,2)
-plot(s_e), title('Corrected Speech');
+plot(s_o), title('Corrected Speech');
 subplot(3,1,3)
 plot(s), title('Clean Speech');
 
 %% Sound
-sound(s_e, fs)
+sound(s_o, fs)
