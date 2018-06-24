@@ -37,7 +37,7 @@ for i = 1:size(Pyy,2)
     end
     
     S_hat = Wiener2(apriori_dd, Y(:,i));
-    clean_psd(:,i) = abs(S_hat).^2;
+    clean_psd(:,i) = S_hat;
 end
     
 end

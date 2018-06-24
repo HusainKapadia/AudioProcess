@@ -22,17 +22,17 @@ N = stft(n(ind), win, l, o, 1, fs);
 M = 8;
 Pyy = Bartlett_P(Y, M);
 Pnn = Bartlett_P(N, M);
-[n_mmse,c_mmse] = mmse_noise_tracker(Pyy,Y);
-n_mmse_spp = mmse_noise_tracker_spp(Pyy);
-[~,~,n_vad] = vad_noise_tracker(y);
+[n_mmse,c_mmse_fft] = mmse_noise_tracker(Pyy,Y);
+[n_mmse_spp,c_mmse_spp_fft] = mmse_noise_tracker_spp(Pyy,Y);
+[n_vad,c_vad_fft] = vad_noise_tracker(Pyy,Y,length(ind));
 
 %% Variance
 
-true_varw = zeros(size(Pnn,2),1);
-true_varw(1) = mean(Pnn(:,1));
+true_varw = zeros(size(Pyy,2),1);
+true_varw(1) = mean(Pyy(:,1));
 alpha = 0.8;
-for i = 2:size(Pnn,2)
-    true_varw(i) = mean(Pnn(:,i));
+for i = 2:size(Pyy,2)
+    true_varw(i) = mean(Pyy(:,i));
 end
 
 figure
@@ -49,6 +49,15 @@ ylabel('\sigma^2_w (db)')
 legend('True Noise Variance','MMSE-SPP Noise Variance','MMSE Noise Variance','VAD Noise Variance')
 %axis([0 size(Y,2) -32 -17])
 %% Clean Speech Estimation
-c_vad = Wiener1(Pyy,n_vad,Y);
-c_mmse_spp = Wiener1(Pyy,n_mmse_Y);
+c_vad_fft = Wiener1(Pyy,n_vad,Y);
+c_vad = stift(c_vad_fft, win, l, o, 1, fs);
 
+c_mmse_spp_fft = Wiener1(Pyy,n_mmse_spp,Y);
+c_mmse_spp = stift(c_mmse_spp_fft, win, l, o, 1, fs);
+
+%c_mmse_fft = Wiener1(Pyy,n_mmse,Y);
+c_mmse=stift(c_mmse_fft, win, l, o, 1, fs);
+ssnr_vad = ssnr(s(ind),c_vad,fs);
+ssnr_mmse_spp = ssnr(s(ind),c_mmse_spp,fs);
+ssnr_mmse = ssnr(s(ind),c_mmse,fs);
+ssnr_noisy = ssnr(s(ind),y(ind),fs);
