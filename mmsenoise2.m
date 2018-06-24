@@ -2,8 +2,8 @@ clc;
 close all;
 
 s = audioread('AudioFiles/clean_speech.wav');
-type = 2;
-db = 20;
+type = 4;
+db = 40;
 n = genNoise(type, db, length(s));
 
 ind = 1:70000;
@@ -21,7 +21,7 @@ N = stft(n(ind), win, l, o, 1, fs);
 
 M = 4;
 Pyy = Bartlett_P(Y, M);
-Pnn = Bartlett_P(N, M);
+Pnn = Bartlett_P(N, 1);
 
 %Initialize the noise estimate by assuming first eight frames are noise
 varw_hat = zeros(size(Pyy));
@@ -32,7 +32,7 @@ smoothed_varw_hat = zeros(size(Pyy));
 %Update noise using safety net
 time_interval = 800; %samples
 time_frame = floor(time_interval/l); %safety frame
-alpha = 0.99;
+alpha = 0.1;
 beta = 0.85;
 
 [apost_snr, apriori_snr] = SNR_estimates(Pyy(:,1), varw_hat(:,1), 'ML');

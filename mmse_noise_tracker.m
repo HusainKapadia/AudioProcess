@@ -1,10 +1,11 @@
-function [noise_psd,clean_psd] = mmse_noise_tracker(Pyy,Y)
+function [noise_psd, clean_psd] = mmse_noise_tracker(Pyy, Y)
 noise_psd(:,1) = mean(Pyy(:,1:5),2);
 smoothed_varw_hat = zeros(size(Pyy));
 time_frame = 103; %safety frame 0.8 seconds
 alpha = 0.98;
 beta = 0.8;
 S_hat = 0;
+
 for i = 1:size(Pyy,2)
     if(i==1)
         apost_snr = (Pyy(:,i))./noise_psd(:,i);
@@ -36,5 +37,7 @@ for i = 1:size(Pyy,2)
     end
     
     S_hat = Wiener2(apriori_dd, Y(:,i));
-    clean_psd(:,i) = S_hat;
+    clean_psd(:,i) = abs(S_hat).^2;
+end
+    
 end

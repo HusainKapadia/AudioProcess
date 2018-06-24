@@ -1,23 +1,13 @@
-function [lrt_expanded,silent_frames,noise_psd] = vad_noise_tracker(y)
-
-fs = 16000;
-l = 15;
-o = 60;
-win = 4;
-
-Y = stft(y, win, l, o, 1, fs);
-frame = l*fs/1000;
-
-M = 8;
-Pyy = Bartlett_P(Y, M);
-silent_frames = zeros(size(y));
+function [lrt_expanded,silent_frames,noise_psd] = vad_noise_tracker(Pyy, Y, size)
+silent_frames = zeros(size);
 %Initialize the noise estimate by assuming first eight frames are noise
+
 noise_psd = zeros(size(Pyy));
 noise_psd(:,1) = Pyy(:,1);
 alpha = 0.99;
 beta = 0.9;
 S_hat = 0;
-lrt_expanded = zeros(size(y));
+lrt_expanded = zeros(size);
 for i = 2:size(Pyy,2)
     
     if(i==1)
