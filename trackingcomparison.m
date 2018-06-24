@@ -24,7 +24,7 @@ Pyy = Bartlett_P(Y, M);
 Pnn = Bartlett_P(N, M);
 [n_mmse,c_mmse_fft] = mmse_noise_tracker(Pyy,Y);
 [n_mmse_spp,c_mmse_spp_fft] = mmse_noise_tracker_spp(Pyy,Y);
-[n_vad,c_vad_fft] = vad_noise_tracker(Pyy,Y,length(ind));
+[n_vad,c_vad_fft] = vad_noise_tracker(Pyy,Y);
 
 %% Variance
 
@@ -49,10 +49,10 @@ ylabel('\sigma^2_w (db)')
 legend('True Noise Variance','MMSE-SPP Noise Variance','MMSE Noise Variance','VAD Noise Variance')
 %axis([0 size(Y,2) -32 -17])
 %% Clean Speech Estimation
-c_vad_fft = Wiener1(Pyy,n_vad,Y);
+%c_vad_fft = Wiener1(Pyy,n_vad,Y);
 c_vad = stift(c_vad_fft, win, l, o, 1, fs);
 
-c_mmse_spp_fft = Wiener1(Pyy,n_mmse_spp,Y);
+%c_mmse_spp_fft = Wiener1(Pyy,n_mmse_spp,Y);
 c_mmse_spp = stift(c_mmse_spp_fft, win, l, o, 1, fs);
 
 %c_mmse_fft = Wiener1(Pyy,n_mmse,Y);

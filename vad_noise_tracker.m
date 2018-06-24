@@ -1,4 +1,4 @@
-function [noise_psd,clean_psd] = vad_noise_tracker(Pyy, Y, l)
+function [noise_psd,clean_psd] = vad_noise_tracker(Pyy, Y)
 %silent_frames = zeros(l,1);
 %Initialize the noise estimate by assuming first eight frames are noise
 
@@ -7,7 +7,7 @@ noise_psd(:,1) = Pyy(:,1);
 alpha = 0.99;
 beta = 0.9;
 S_hat = 0;
-lrt_expanded = zeros(l,1);
+%lrt_expanded = zeros(l,1);
 for i = 2:size(Pyy,2)
     
     if(i==1)
