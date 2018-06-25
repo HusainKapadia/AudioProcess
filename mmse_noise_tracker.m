@@ -1,4 +1,4 @@
-function [noise_psd, clean_fft] = mmse_noise_tracker(Pyy, Y)
+function [noise_psd, clean_fft] = mmse_noise_tracker(Pyy, Y,type)
 noise_psd(:,1) = mean(Pyy(:,1:5),2);
 smoothed_varw_hat = zeros(size(Pyy));
 time_frame = 103; %safety frame 0.8 seconds
@@ -36,7 +36,14 @@ for i = 1:size(Pyy,2)
         apriori_dd = max(alpha*abs(S_hat).^2./noise_psd(:,i-1) + (1-alpha)*apriori_ml,eps);
     end
     
-    S_hat = Wiener2(apriori_dd, Y(:,i));
+    if(strcmp(type,'Wiener'))
+        S_hat = Wiener2(apriori_dd, Y(:,i));
+    elseif(strcmp(type,'SS'))
+        S_hat = Spectral_Subtraction(Pyy(:,i),noise_psd(:,i),Y(:,i));
+    else
+        msg = 'Unknown Speech Estimation Type';
+        error(msg)
+    end
     clean_fft(:,i) = S_hat;
 end
     

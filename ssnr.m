@@ -4,7 +4,7 @@ function s = ssnr(clean,estimated,fs)
      s = 0;
      for i = 1:M-L
         s = s + min(max(10*log(sum(clean(i*L:(i+1)*L).^2)./...
-            sum(estimated(i*L:(i+1)*L).^2)),-10), 35);
+            sum((clean(i*L:(i+1)*L)-estimated(i*L:(i+1)*L)).^2)),-10), 35);
      end
      s = s/M;
 end
