@@ -10,7 +10,7 @@ n3 = genNoise(3, db, length(s));
 n4 = genNoise(4, 40, length(s));
 
 fs = 16000;                     %sampling frequency
-ind = 1:70000;                  %length of speech
+ind = 1:96240;                  %length of speech
 m = 4;                          %number of mics
 l = 15;                         %frame length in ms
 o = 60;                         %percent overlap
@@ -64,9 +64,7 @@ Pse = Bartlett_P(S_e, M);
 [noise_psd1, S_o1] = mmse_noise_tracker(Pse, S_e);
 [noise_psd2, S_o2] = vad_noise_tracker(Pse, S_e);
 [noise_psd3, S_o3] = mmse_noise_tracker_spp(Pse, S_e);
-%S_o1 = Wiener1(Pse, noise_psd1, S_e);
-%S_o2 = Wiener1(Pse, noise_psd2, S_e);
-%S_o3 = Wiener1(Pse, noise_psd3, S_e);
+[noise_psd, S_o] = mmse_noise_tracker_spp(Pse,Y,'Wiener');
 
 %%STIFT with overlap add
 s_o1 = stift(S_o1, 4, l, o, 1, fs);
@@ -74,6 +72,7 @@ s_o2 = stift(S_o2, 4, l, o, 1, fs);
 s_o3 = stift(S_o3, 4, l, o, 1, fs);
 
 %% Plots
+t = (1:96240)/fs;
 figure()
 subplot(3,1,1)
 plot(s_o1), title('Noisy Speech');
@@ -91,5 +90,16 @@ STOI2 = stoi(s(1:length(s_o),1), s_o2, fs)
 
 SSNR3 = ssnr(s(1:length(s_o),1), s_o3, fs)
 STOI3 = stoi(s(1:length(s_o),1), s_o3, fs)
+
+plot(t,y(ind)), title('Noisy Speech');
+axis([1 96240/fs -0.5 0.5]);
+
+subplot(3,1,2)
+plot(t,s_o(ind)), title('Corrected Speech');
+axis([1 96240/fs -0.5 0.5]);
+
+subplot(3,1,3)
+plot(t,s(ind)), title('Clean Speech');
+axis([1 96240/fs -0.5 0.5]);
 %% Sound
 sound(s_o3, fs)
