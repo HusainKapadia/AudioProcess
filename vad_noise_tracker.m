@@ -1,4 +1,4 @@
-function [noise_psd,clean_psd] = vad_noise_tracker(Pyy, Y)
+function [noise_psd,clean_psd] = vad_noise_tracker(Pyy, Y, type)
 %silent_frames = zeros(l,1);
 %Initialize the noise estimate by assuming first eight frames are noise
 
@@ -31,7 +31,14 @@ for i = 2:size(Pyy,2)
     else
         noise_psd(:,i) = beta*noise_psd(:,i-1)+(1-beta)*Pyy(:,i);
     end
-    S_hat = Wiener2(apriori_dd,Y(:,i));
+    if(strcmp(type,'Wiener'))
+        S_hat = Wiener2(apriori_dd, Y(:,i));
+    elseif(strcmp(type,'SS'))
+        S_hat = Spectral_Subtraction(Pyy(:,i),noise_psd(:,i),Y(:,i));
+    else
+        msg = 'Unknown Speech Estimation Type';
+        error(msg)
+    end
     clean_psd(:,i) = S_hat;
     %lrt_expanded((i-1)* (1 - 0.01*o)*frame+1:frame+(i-1)* (1 - 0.01*o)*frame) = ones(frame,1)*lrt(i);
 end
